@@ -1,4 +1,4 @@
-# AmbientMonitor
+# Ambient Monitor
 An app to make extra monitors ambient displays for games and video by blurring mirrored duplicates of the primary display.  
 Image stretches to window size.  
 
