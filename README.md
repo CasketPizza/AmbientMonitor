@@ -1,6 +1,7 @@
 # Ambient Monitor
 An app to make extra monitors ambient displays for games and video by blurring mirrored duplicates of the primary display.  
-Image stretches to window size.  
+![Ambient Monitor Icon](Ambient_Monitor_Icon.png)  
+Image stretches to window size. For multi-monitor setups, run multiple instances.
 
 ## Controls:
 **Spacebar**: Toggle full-screen  
@@ -16,4 +17,5 @@ Image stretches to window size.
 **9**: Save settings.  
 **0**: Reset all settings (does not affect save until overwritten).  
 ##
-Written in Python 3 with the help of ChatGPT.
+Written in Python 3 with the help of ChatGPT.  
+*I have no coding expertise, please feel free to modify this script. I tried to get it to fade to black on the outside edges and to display the controls within the window but had no success. It's also dreadfully unoptimised, and could potentially affect game performance.*
