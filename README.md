@@ -3,6 +3,10 @@ An app to make extra monitors ambient displays for games and video by blurring m
 ![Ambient Monitor Icon](Ambient_Monitor_Icon.png)  
 Image stretches to window size. For multi-monitor setups, run multiple instances.
 
+# Setup
+Download and install Python3, then run the RUN ME FIRST to install all the requirements automatically.
+Once they're done, just run the exe.
+
 ## Controls:
 **Spacebar**: Toggle full-screen  
 **Enter**: Toggle between the entire primary monitor, the left half, or the right half.  
