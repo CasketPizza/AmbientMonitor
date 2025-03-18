@@ -40,11 +40,18 @@
         .controls {
             position: absolute;
             bottom: 20px;
-            left: 20px;
+            left: 20px; /* Align controls to the left */
             color: white;
             font-size: 18px;
             z-index: 3;
-            display: none; /* Hidden by default */
+            display: block;
+            transition: opacity 0.5s ease; /* Smooth transition for hiding/showing controls */
+        }
+
+        /* Hide controls by default */
+        .controls.hidden {
+            opacity: 0;
+            pointer-events: none; /* Prevent interaction when hidden */
         }
 
         /* Text for feedback */
@@ -58,23 +65,122 @@
             z-index: 3;
             display: none; /* Hidden by default */
         }
+
+        /* Button styles */
+        .control-button {
+            font-size: 18px; /* Slightly smaller font for better fitting */
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            display: inline-block;
+            user-select: none; /* Disable text selection */
+            margin: 0 10px;
+            width: 120px; /* Increased width to ensure no text protrusion */
+            height: 80px; /* Keep the same height */
+            text-align: center;
+            line-height: 50px; /* Center text vertically */
+            vertical-align: middle; /* Align buttons with label */
+        }
+
+        .control-button span {
+            display: block;
+            font-size: 16px; /* Slightly smaller text size */
+        }
+
+        .controls div {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            display: inline-block;
+            color: white;
+            font-size: 18px;
+            margin: 0 10px;
+            vertical-align: middle;
+            text-align: center;
+            line-height: 80px; /* Vertically center the label */
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Align all elements to the sides */
+        }
+
+        .control-button-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
     <video id="screenVideo" autoplay></video>
     <div class="noise-overlay"></div> <!-- Strong noise overlay -->
     <div class="controls">
-        <p>Press 1-8 for adjustments:</p>
-        <ul>
-            <li>1: Decrease brightness</li>
-            <li>2: Increase brightness</li>
-            <li>3: Decrease contrast</li>
-            <li>4: Increase contrast</li>
-            <li>5: Decrease scale factor</li>
-            <li>6: Increase scale factor</li>
-            <li>7: Decrease blur amount</li>
-            <li>8: Increase blur amount</li>
-        </ul>
+        <p>Use the buttons below to adjust settings:</p>
+        <div class="control-row">
+            <div class="control-button-wrapper">
+                <button class="control-button" id="decrease-brightness">
+                    <span>-</span>
+                </button>
+                <span class="control-label" id="brightness-label">Brightness</span>
+                <button class="control-button" id="increase-brightness">
+                    <span>+</span>
+                </button>
+            </div>
+        </div>
+        <div class="control-row">
+            <div class="control-button-wrapper">
+                <button class="control-button" id="decrease-contrast">
+                    <span>-</span>
+                </button>
+                <span class="control-label" id="contrast-label">Contrast</span>
+                <button class="control-button" id="increase-contrast">
+                    <span>+</span>
+                </button>
+            </div>
+        </div>
+        <div class="control-row">
+            <div class="control-button-wrapper">
+                <button class="control-button" id="decrease-scale">
+                    <span>-</span>
+                </button>
+                <span class="control-label" id="scale-label">Scale</span>
+                <button class="control-button" id="increase-scale">
+                    <span>+</span>
+                </button>
+            </div>
+        </div>
+        <div class="control-row">
+            <div class="control-button-wrapper">
+                <button class="control-button" id="decrease-blur">
+                    <span>-</span>
+                </button>
+                <span class="control-label" id="blur-label">Blur</span>
+                <button class="control-button" id="increase-blur">
+                    <span>+</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- New Flip Image Section -->
+        <h3>Flip Image</h3>
+        <div class="control-row">
+            <div class="control-label">Horizontal</div>
+            <button class="control-button" id="flip-horizontal" data-enabled="true">
+                <span id="horizontal-status">Enabled</span>
+            </button>
+        </div>
+        <div class="control-row">
+            <div class="control-label">Vertical</div>
+            <button class="control-button" id="flip-vertical" data-enabled="false">
+                <span id="vertical-status">Disabled</span>
+            </button>
+        </div>
+
         <p>Press F11 to toggle fullscreen</p>
         <p>Press Backspace to reset settings</p>
     </div>
@@ -82,13 +188,14 @@
 
     <script>
         let video = document.getElementById("screenVideo");
-        let videoFilter = video.style.filter;
 
         // Default values
         let brightness = 100;
         let contrast = 100;
         let scale = 1;
         let blur = 75;
+        let isHorizontalFlipped = true;  // Horizontal flip is enabled by default
+        let isVerticalFlipped = false;   // Vertical flip is disabled by default
 
         async function startScreenCapture() {
             try {
@@ -111,17 +218,70 @@
 
         startScreenCapture();
 
-        // Show controls when mouse enters the window
-        document.body.addEventListener('mouseenter', () => {
-            document.querySelector('.controls').style.display = 'block';
+        // Button click handlers
+        document.getElementById('decrease-brightness').addEventListener('click', () => {
+            brightness = Math.max(0, brightness - 10);
+            updateFilters();
+            showFeedback(`Brightness: ${brightness}%`);
         });
 
-        // Hide controls when mouse leaves the window
-        document.body.addEventListener('mouseleave', () => {
-            document.querySelector('.controls').style.display = 'none';
+        document.getElementById('increase-brightness').addEventListener('click', () => {
+            brightness = Math.min(200, brightness + 10);
+            updateFilters();
+            showFeedback(`Brightness: ${brightness}%`);
         });
 
-        // Handle number key presses
+        document.getElementById('decrease-contrast').addEventListener('click', () => {
+            contrast = Math.max(0, contrast - 10);
+            updateFilters();
+            showFeedback(`Contrast: ${contrast}%`);
+        });
+
+        document.getElementById('increase-contrast').addEventListener('click', () => {
+            contrast = Math.min(200, contrast + 10);
+            updateFilters();
+            showFeedback(`Contrast: ${contrast}%`);
+        });
+
+        document.getElementById('decrease-scale').addEventListener('click', () => {
+            scale = Math.max(0.5, scale - 0.1);
+            video.style.transform = `scaleX(-1) scale(${scale})`;
+            showFeedback(`Scale: ${Math.round(scale * 100)}%`);
+        });
+
+        document.getElementById('increase-scale').addEventListener('click', () => {
+            scale = Math.min(2, scale + 0.1);
+            video.style.transform = `scaleX(-1) scale(${scale})`;
+            showFeedback(`Scale: ${Math.round(scale * 100)}%`);
+        });
+
+        document.getElementById('decrease-blur').addEventListener('click', () => {
+            blur = Math.max(0, blur - 5);
+            updateFilters();
+            showFeedback(`Blur: ${blur}px`);
+        });
+
+        document.getElementById('increase-blur').addEventListener('click', () => {
+            blur = Math.min(100, blur + 5);
+            updateFilters();
+            showFeedback(`Blur: ${blur}px`);
+        });
+
+        // Toggle horizontal flip
+        document.getElementById('flip-horizontal').addEventListener('click', () => {
+            isHorizontalFlipped = !isHorizontalFlipped;
+            video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scale(${scale})`;
+            document.getElementById('horizontal-status').textContent = isHorizontalFlipped ? 'Enabled' : 'Disabled';
+        });
+
+        // Toggle vertical flip
+        document.getElementById('flip-vertical').addEventListener('click', () => {
+            isVerticalFlipped = !isVerticalFlipped;
+            video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
+            document.getElementById('vertical-status').textContent = isVerticalFlipped ? 'Enabled' : 'Disabled';
+        });
+
+        // Fullscreen toggle
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F11') {
                 if (document.fullscreenElement) {
@@ -129,46 +289,18 @@
                 } else {
                     document.documentElement.requestFullscreen();
                 }
-            } else if (e.key === '1') {
-                brightness = Math.max(0, brightness - 10);
-                updateFilters();
-                showFeedback(`Brightness: ${brightness}%`);
-            } else if (e.key === '2') {
-                brightness = Math.min(200, brightness + 10);
-                updateFilters();
-                showFeedback(`Brightness: ${brightness}%`);
-            } else if (e.key === '3') {
-                contrast = Math.max(0, contrast - 10);
-                updateFilters();
-                showFeedback(`Contrast: ${contrast}%`);
-            } else if (e.key === '4') {
-                contrast = Math.min(200, contrast + 10);
-                updateFilters();
-                showFeedback(`Contrast: ${contrast}%`);
-            } else if (e.key === '5') {
-                scale = Math.max(0.5, scale - 0.1);
-                video.style.transform = `scaleX(-1) scale(${scale})`;
-                showFeedback(`Scale: ${Math.round(scale * 100)}%`);
-            } else if (e.key === '6') {
-                scale = Math.min(2, scale + 0.1);
-                video.style.transform = `scaleX(-1) scale(${scale})`;
-                showFeedback(`Scale: ${Math.round(scale * 100)}%`);
-            } else if (e.key === '7') {
-                blur = Math.max(0, blur - 5);
-                updateFilters();
-                showFeedback(`Blur: ${blur}px`);
-            } else if (e.key === '8') {
-                blur = Math.min(100, blur + 5);
-                updateFilters();
-                showFeedback(`Blur: ${blur}px`);
             } else if (e.key === 'Backspace') {
                 // Reset settings
                 brightness = 100;
                 contrast = 100;
                 scale = 1;
                 blur = 75;
+                isHorizontalFlipped = true;
+                isVerticalFlipped = false;
                 updateFilters();
                 video.style.transform = 'scaleX(-1) scale(1)';
+                document.getElementById('horizontal-status').textContent = 'Enabled';
+                document.getElementById('vertical-status').textContent = 'Disabled';
                 showFeedback(`Settings reset`);
             }
         });
@@ -192,6 +324,23 @@
                 feedback.style.display = 'none';
             }, 3000); // Feedback stays visible for 3 seconds
         }
+
+        // Detect mouse leave and hide controls
+        let controls = document.querySelector('.controls');
+        let timeoutId;
+
+        document.addEventListener('mousemove', () => {
+            clearTimeout(timeoutId);
+            if (controls.classList.contains('hidden')) {
+                controls.classList.remove('hidden');
+            }
+            timeoutId = setTimeout(() => {
+                controls.classList.add('hidden');
+            }, 2000); // Hide controls after 2 seconds of inactivity
+        });
+
+        // Initially hide controls
+        controls.classList.add('hidden');
     </script>
 </body>
 </html>
