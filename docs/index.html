@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Screen Capture Wallpaper</title>
+    <title>Ambient Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet"> <!-- Import VT323 font -->
     <style>
         body, html {
             height: 100%;
             margin: 0;
             overflow: hidden;
             background: black;
+            font-family: 'VT323', monospace; /* Applying VT323 font globally */
         }
         video {
             width: 100%;
@@ -51,13 +53,10 @@
             left: 20px;
             color: white;
             font-size: 72px; /* Increased size by 4 times */
-            font-family: 'VCR OSD Mono', monospace; /* Use the requested font */
+            font-family: 'VT323', monospace; /* Applying VT323 font to feedback text */
             z-index: 3;
             display: none; /* Hidden by default */
         }
-
-        /* Import the VCR OSD Mono font */
-        @import url('https://fonts.googleapis.com/css2?family=VCR+OSD+Mono&display=swap');
     </style>
 </head>
 <body>
