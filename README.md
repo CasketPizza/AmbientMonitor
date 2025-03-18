@@ -3,7 +3,9 @@ An app to make extra monitors ambient displays for games and video by blurring m
 ![Ambient Monitor Icon](Ambient_Monitor_Icon.png)  
 Image stretches to window size. For multi-monitor setups, run multiple instances.
 
-# Setup
+### [There is now a browser-based, no-download version here (causes less issues, but lower framerate).](https://casketpizza.github.io/AmbientMonitor/)
+
+# Setup (for download version)
 Download and install Python3, then run the RUN ME FIRST to install all the requirements automatically.
 Once they're done, just run the exe.
 
