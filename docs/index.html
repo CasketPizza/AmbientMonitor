@@ -40,18 +40,12 @@
         .controls {
             position: absolute;
             bottom: 20px;
-            left: 20px; /* Align controls to the left */
+            left: 20px; /* Move controls to the bottom left */
             color: white;
             font-size: 18px;
             z-index: 3;
-            display: block;
-            transition: opacity 0.5s ease; /* Smooth transition for hiding/showing controls */
-        }
-
-        /* Hide controls by default */
-        .controls.hidden {
-            opacity: 0;
-            pointer-events: none; /* Prevent interaction when hidden */
+            display: none; /* Hidden by default */
+            text-align: center;
         }
 
         /* Text for feedback */
@@ -68,25 +62,43 @@
 
         /* Button styles */
         .control-button {
-            font-size: 18px; /* Slightly smaller font for better fitting */
-            color: white;
-            background: rgba(0, 0, 0, 0.5);
-            border: none;
-            padding: 15px;
-            cursor: pointer;
-            display: inline-block;
-            user-select: none; /* Disable text selection */
-            margin: 0 10px;
-            width: 120px; /* Increased width to ensure no text protrusion */
-            height: 80px; /* Keep the same height */
-            text-align: center;
-            line-height: 50px; /* Center text vertically */
-            vertical-align: middle; /* Align buttons with label */
-        }
+    font-family: 'VT323', monospace; /* Add the font family here */
+    font-size: 50px;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    display: inline-block;
+    user-select: none; /* Disable text selection */
+    margin: 0 10px;
+    width: 80px; /* Set width to make them square */
+    height: 80px; /* Set height to make them square */
+    text-align: center;
+    line-height: 50px; /* Center text vertically */
+    vertical-align: middle; /* Align buttons with label */
+}
+.control-button-flip {
+    font-family: 'VT323', monospace; /* Add the font family here */
+    font-size: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    display: inline-block;
+    user-select: none; /* Disable text selection */
+    margin: 0 10px;
+    width: 100px; /* Set width to make them square */
+    height: 80px; /* Set height to make them square */
+    text-align: center;
+    line-height: 20px; /* Center text vertically */
+    vertical-align: middle; /* Align buttons with label */
+}
 
         .control-button span {
             display: block;
-            font-size: 16px; /* Slightly smaller text size */
+            font-size: 50px;
         }
 
         .controls div {
@@ -105,15 +117,32 @@
 
         .control-row {
             display: flex;
+            justify-content: space-between; /* Space between the columns */
+            margin-bottom: 15px;
             align-items: center;
-            justify-content: space-between; /* Align all elements to the sides */
+            width: 100%;
         }
 
         .control-button-wrapper {
             display: flex;
+            flex-direction: column;
+            align-items: center; /* Center buttons */
+            width: 100px; /* Ensure same width for all button columns */
+        }
+
+        .control-label-wrapper {
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
+
+        .controls .control-row {
+            display: flex;
+            justify-content: space-evenly; /* Evenly space the columns */
+            width: 100%;
+        }
+
     </style>
 </head>
 <body>
@@ -126,76 +155,70 @@
                 <button class="control-button" id="decrease-brightness">
                     <span>-</span>
                 </button>
-                <span class="control-label" id="brightness-label">Brightness</span>
-                <button class="control-button" id="increase-brightness">
-                    <span>+</span>
-                </button>
-            </div>
-        </div>
-        <div class="control-row">
-            <div class="control-button-wrapper">
                 <button class="control-button" id="decrease-contrast">
                     <span>-</span>
                 </button>
-                <span class="control-label" id="contrast-label">Contrast</span>
-                <button class="control-button" id="increase-contrast">
-                    <span>+</span>
-                </button>
-            </div>
-        </div>
-        <div class="control-row">
-            <div class="control-button-wrapper">
                 <button class="control-button" id="decrease-scale">
                     <span>-</span>
                 </button>
-                <span class="control-label" id="scale-label">Scale</span>
-                <button class="control-button" id="increase-scale">
-                    <span>+</span>
-                </button>
-            </div>
-        </div>
-        <div class="control-row">
-            <div class="control-button-wrapper">
                 <button class="control-button" id="decrease-blur">
                     <span>-</span>
                 </button>
+            </div>
+
+            <div class="control-label-wrapper">
+                <span class="control-label" id="brightness-label">Brightness</span>
+                <span class="control-label" id="contrast-label">Contrast</span>
+                <span class="control-label" id="scale-label">Scale</span>
                 <span class="control-label" id="blur-label">Blur</span>
+            </div>
+
+            <div class="control-button-wrapper">
+                <button class="control-button" id="increase-brightness">
+                    <span>+</span>
+                </button>
+                <button class="control-button" id="increase-contrast">
+                    <span>+</span>
+                </button>
+                <button class="control-button" id="increase-scale">
+                    <span>+</span>
+                </button>
                 <button class="control-button" id="increase-blur">
                     <span>+</span>
                 </button>
             </div>
         </div>
-
-        <!-- New Flip Image Section -->
-        <h3>Flip Image</h3>
-        <div class="control-row">
-            <div class="control-label">Horizontal</div>
-            <button class="control-button" id="flip-horizontal" data-enabled="true">
-                <span id="horizontal-status">Enabled</span>
-            </button>
-        </div>
-        <div class="control-row">
-            <div class="control-label">Vertical</div>
-            <button class="control-button" id="flip-vertical" data-enabled="false">
-                <span id="vertical-status">Disabled</span>
-            </button>
-        </div>
-
+		<!--
         <p>Press F11 to toggle fullscreen</p>
         <p>Press Backspace to reset settings</p>
+		-->
+		<!-- New Flip Image Section -->
+<h3>Flip Image</h3>
+<div class="control-row">
+    <div class="control-label">Horizontal</div>
+    <button class="control-button-flip" id="flip-horizontal" data-enabled="true">
+        <span id="horizontal-status">Enabled</span>
+    </button>
+</div>
+<div class="control-row">
+    <div class="control-label">Vertical</div>
+    <button class="control-button-flip" id="flip-vertical" data-enabled="false">
+        <span id="vertical-status">Disabled</span>
+    </button>
+</div>
+
     </div>
     <div class="feedback" id="feedback"></div>
 
     <script>
         let video = document.getElementById("screenVideo");
+        let videoFilter = video.style.filter;
 
         // Default values
         let brightness = 100;
         let contrast = 100;
         let scale = 1;
         let blur = 75;
-        let isHorizontalFlipped = true;  // Horizontal flip is enabled by default
-        let isVerticalFlipped = false;   // Vertical flip is disabled by default
 
         async function startScreenCapture() {
             try {
@@ -217,6 +240,33 @@
         }
 
         startScreenCapture();
+
+        // Show controls when mouse enters the window
+        document.body.addEventListener('mouseenter', () => {
+            document.querySelector('.controls').style.display = 'block';
+        });
+
+        // Hide controls when mouse leaves the window
+        document.body.addEventListener('mouseleave', () => {
+            document.querySelector('.controls').style.display = 'none';
+        });
+		// Initialize the flip state variables
+let isHorizontalFlipped = true;
+let isVerticalFlipped = false;
+
+// Toggle horizontal flip
+document.getElementById('flip-horizontal').addEventListener('click', () => {
+    isHorizontalFlipped = !isHorizontalFlipped;
+    video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
+    document.getElementById('horizontal-status').textContent = isHorizontalFlipped ? 'Enabled' : 'Disabled';
+});
+
+// Toggle vertical flip
+document.getElementById('flip-vertical').addEventListener('click', () => {
+    isVerticalFlipped = !isVerticalFlipped;
+    video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
+    document.getElementById('vertical-status').textContent = isVerticalFlipped ? 'Enabled' : 'Disabled';
+});
 
         // Button click handlers
         document.getElementById('decrease-brightness').addEventListener('click', () => {
@@ -267,20 +317,6 @@
             showFeedback(`Blur: ${blur}px`);
         });
 
-        // Toggle horizontal flip
-        document.getElementById('flip-horizontal').addEventListener('click', () => {
-            isHorizontalFlipped = !isHorizontalFlipped;
-            video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scale(${scale})`;
-            document.getElementById('horizontal-status').textContent = isHorizontalFlipped ? 'Enabled' : 'Disabled';
-        });
-
-        // Toggle vertical flip
-        document.getElementById('flip-vertical').addEventListener('click', () => {
-            isVerticalFlipped = !isVerticalFlipped;
-            video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
-            document.getElementById('vertical-status').textContent = isVerticalFlipped ? 'Enabled' : 'Disabled';
-        });
-
         // Fullscreen toggle
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F11') {
@@ -295,12 +331,8 @@
                 contrast = 100;
                 scale = 1;
                 blur = 75;
-                isHorizontalFlipped = true;
-                isVerticalFlipped = false;
                 updateFilters();
                 video.style.transform = 'scaleX(-1) scale(1)';
-                document.getElementById('horizontal-status').textContent = 'Enabled';
-                document.getElementById('vertical-status').textContent = 'Disabled';
                 showFeedback(`Settings reset`);
             }
         });
@@ -324,23 +356,237 @@
                 feedback.style.display = 'none';
             }, 3000); // Feedback stays visible for 3 seconds
         }
-
-        // Detect mouse leave and hide controls
-        let controls = document.querySelector('.controls');
-        let timeoutId;
-
-        document.addEventListener('mousemove', () => {
-            clearTimeout(timeoutId);
-            if (controls.classList.contains('hidden')) {
-                controls.classList.remove('hidden');
-            }
-            timeoutId = setTimeout(() => {
-                controls.classList.add('hidden');
-            }, 2000); // Hide controls after 2 seconds of inactivity
-        });
-
-        // Initially hide controls
-        controls.classList.add('hidden');
     </script>
+	<style>
+    /* Fullscreen button styling */
+    .fullscreen-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 20px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        border: none;
+        padding: 15px;
+        cursor: pointer;
+        width: 150px;
+        height: 80px;
+        text-align: center;
+        line-height: 20px;
+        vertical-align: middle;
+        font-family: 'VT323', monospace;
+        z-index: 4;
+        display: none; /* Hidden by default */
+    }
+</style>
+
+<!-- Fullscreen Toggle Button -->
+<button class="fullscreen-button" id="fullscreen-toggle">Enter Fullscreen</button>
+
+<script>
+    const fullscreenButton = document.getElementById("fullscreen-toggle");
+
+    // Toggle fullscreen function
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullscreenButton.textContent = "Exit Fullscreen";
+        } else {
+            document.exitFullscreen();
+            fullscreenButton.textContent = "Enter Fullscreen";
+        }
+    }
+
+    fullscreenButton.addEventListener("click", toggleFullscreen);
+
+    // Show controls and fullscreen button when mouse enters the window
+    document.body.addEventListener('mouseenter', () => {
+        document.querySelector('.controls').style.display = 'block';
+        fullscreenButton.style.display = 'block';
+    });
+
+    // Hide controls and fullscreen button when mouse leaves the window
+    document.body.addEventListener('mouseleave', () => {
+        document.querySelector('.controls').style.display = 'none';
+        fullscreenButton.style.display = 'none';
+    });
+
+    // Update button text when fullscreen changes
+    document.addEventListener("fullscreenchange", () => {
+        fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
+    });
+</script>
+
+<style>
+    /* Reset button styling */
+    .reset-button {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%); /* Center the button horizontally */
+        font-size: 20px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        border: none;
+        padding: 15px;
+        cursor: pointer;
+        width: 120px;
+        height: 80px;
+        text-align: center;
+        line-height: 20px;
+        vertical-align: middle;
+        font-family: 'VT323', monospace;
+        z-index: 4;
+        display: none; /* Hidden by default */
+    }
+
+    /* Confirmation button styling (red text) */
+    .confirm-button {
+        color: red;
+    }
+</style>
+
+<!-- Reset Button -->
+<button class="reset-button" id="reset-button">Reset</button>
+
+<script>
+    const resetButton = document.getElementById("reset-button");
+
+// Flag to track if the button is in "Confirm" mode
+let isConfirmMode = false;
+
+// Reset function
+function resetSettings() {
+    // Only reset if in Confirm mode
+    if (isConfirmMode) {
+        // Reset video settings
+        brightness = 100;
+        contrast = 100;
+        scale = 1;
+        blur = 75;
+        updateFilters();
+        video.style.transform = 'scaleX(-1) scale(1)';
+        showFeedback("Settings reset");
+
+        // Reset flip states and labels
+        isHorizontalFlipped = true;  // Set back to initial state
+        isVerticalFlipped = false;  // Set back to initial state
+        document.getElementById('horizontal-status').textContent = 'Enabled'; // Horizontal flip label
+        document.getElementById('vertical-status').textContent = 'Disabled';  // Vertical flip label
+
+        // Reset button to original state after resetting settings
+        resetButton.textContent = "Reset";
+        resetButton.classList.remove("confirm-button");
+        isConfirmMode = false; // Switch back to normal mode
+        // Restore the "changeToConfirm" listener
+        resetButton.removeEventListener("click", resetSettings);
+        resetButton.addEventListener("click", changeToConfirm); // Go back to confirm state on next click
+    }
+}
+
+
+// Change button to "Confirm" when clicked
+function changeToConfirm() {
+    resetButton.textContent = "Confirm";
+    resetButton.classList.add("confirm-button");
+    isConfirmMode = true; // Set Confirm mode to true
+    resetButton.removeEventListener("click", changeToConfirm);
+    resetButton.addEventListener("click", resetSettings); // Trigger reset on next click
+}
+
+resetButton.addEventListener("click", changeToConfirm);
+
+
+
+    // Show controls and reset button when mouse enters the window
+    document.body.addEventListener('mouseenter', () => {
+        document.querySelector('.controls').style.display = 'block';
+        resetButton.style.display = 'block';
+    });
+
+    // Hide controls and reset button when mouse leaves the window
+    document.body.addEventListener('mouseleave', () => {
+        document.querySelector('.controls').style.display = 'none';
+        resetButton.style.display = 'none';
+    });
+</script>
+
+<!-- Save and Load Settings Buttons -->
+<div style="position: absolute; bottom: 20px; right: 20px; z-index: 4;">
+    <button class="control-button-flip" id="save-settings">Save Settings</button>
+    <button class="control-button-flip" id="load-settings-button">Load Settings</button>
+    <input type="file" id="load-settings" style="display: none;" />
+</div>
+
+<script>
+// Save and Load Settings Section
+
+// Function to save settings to a file
+function saveSettingsToFile() {
+    const settings = {
+        brightness,
+        contrast,
+        scale,
+        blur,
+        isHorizontalFlipped,
+        isVerticalFlipped
+    };
+
+    const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'AmbientMonitorSettings.json';
+    link.click();
+}
+
+// Function to load settings from a file
+function loadSettingsFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const settings = JSON.parse(e.target.result);
+            // Restore the settings
+            brightness = settings.brightness;
+            contrast = settings.contrast;
+            scale = settings.scale;
+            blur = settings.blur;
+            isHorizontalFlipped = settings.isHorizontalFlipped;
+            isVerticalFlipped = settings.isVerticalFlipped;
+
+            // Update the filters and transformations
+            updateFilters();
+            video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
+
+            showFeedback("Settings loaded successfully!");
+        } catch (error) {
+            showFeedback("Failed to load settings.");
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Event listeners for the Save and Load buttons
+document.getElementById('save-settings').addEventListener('click', saveSettingsToFile);
+document.getElementById('load-settings-button').addEventListener('click', () => {
+    document.getElementById('load-settings').click();
+});
+document.getElementById('load-settings').addEventListener('change', loadSettingsFromFile);
+
+// Hide the buttons when the mouse leaves, just like the controls
+document.body.addEventListener('mouseleave', () => {
+    document.getElementById('save-settings').style.display = 'none';
+    document.getElementById('load-settings-button').style.display = 'none';
+});
+
+document.body.addEventListener('mouseenter', () => {
+    document.getElementById('save-settings').style.display = 'block';
+    document.getElementById('load-settings-button').style.display = 'block';
+});
+</script>
+
+
 </body>
 </html>
