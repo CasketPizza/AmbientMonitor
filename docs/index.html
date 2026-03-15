@@ -4,97 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ambient Monitor</title>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet"> <!-- Import VT323 font -->
-    <link rel="icon" href="https://github.com/CasketPizza/AmbientMonitor/blob/main/Ambient_Monitor_Icon.png?raw=true" type="image/png"> <!-- Favicon -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://github.com/CasketPizza/AmbientMonitor/blob/main/Ambient_Monitor_Icon.png?raw=true" type="image/png">
+
     <style>
-        body, html {
+        html, body {
             height: 100%;
             margin: 0;
             overflow: hidden;
             background: black;
-            font-family: 'VT323', monospace; /* Applying VT323 font globally */
+            font-family: 'VT323', monospace;
         }
+
+        body {
+            position: relative;
+            background: #000;
+        }
+
         video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: blur(75px); /* Apply strong blur */
-            transform: scaleX(-1); /* Apply horizontal mirror effect */
             position: absolute;
+            inset: 0;
             z-index: 1;
+            transform-origin: center center;
+            will-change: transform, filter;
         }
 
         .noise-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/black-tile.png'); /* High-contrast noise texture */
-            pointer-events: none; /* Prevent interaction with the overlay */
+            inset: 0;
             z-index: 2;
-            opacity: 0.8;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            opacity: 0.18;
+            image-rendering: pixelated;
+            will-change: opacity;
         }
 
-        /* Controls container */
         .controls {
             position: absolute;
             bottom: 20px;
-            left: 20px; /* Move controls to the bottom left */
+            left: 20px;
             color: white;
             font-size: 18px;
-            z-index: 3;
-            display: none; /* Hidden by default */
+            z-index: 5;
+            display: none;
             text-align: center;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 12px 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
         }
 
-        /* Text for feedback */
         .feedback {
             position: absolute;
             top: 20px;
             left: 20px;
             color: white;
-            font-size: 72px; /* Increased size by 4 times */
-            font-family: 'VT323', monospace; /* Applying VT323 font to feedback text */
-            z-index: 3;
-            display: none; /* Hidden by default */
+            font-size: 72px;
+            font-family: 'VT323', monospace;
+            z-index: 6;
+            display: none;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
         }
 
-        /* Button styles */
+        .control-button,
+        .control-button-flip,
+        .fullscreen-button,
+        .reset-button {
+            font-family: 'VT323', monospace;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            cursor: pointer;
+            user-select: none;
+        }
+
         .control-button {
-    font-family: 'VT323', monospace; /* Add the font family here */
-    font-size: 50px;
-    color: white;
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    padding: 15px;
-    cursor: pointer;
-    display: inline-block;
-    user-select: none; /* Disable text selection */
-    margin: 0 10px;
-    width: 80px; /* Set width to make them square */
-    height: 80px; /* Set height to make them square */
-    text-align: center;
-    line-height: 50px; /* Center text vertically */
-    vertical-align: middle; /* Align buttons with label */
-}
-.control-button-flip {
-    font-family: 'VT323', monospace; /* Add the font family here */
-    font-size: 20px;
-    color: white;
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    padding: 15px;
-    cursor: pointer;
-    display: inline-block;
-    user-select: none; /* Disable text selection */
-    margin: 0 10px;
-    width: 100px; /* Set width to make them square */
-    height: 80px; /* Set height to make them square */
-    text-align: center;
-    line-height: 20px; /* Center text vertically */
-    vertical-align: middle; /* Align buttons with label */
-}
+            font-size: 50px;
+            padding: 15px;
+            display: inline-block;
+            margin: 0 10px;
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            line-height: 50px;
+            vertical-align: middle;
+        }
+
+        .control-button-flip {
+            font-size: 20px;
+            padding: 15px;
+            display: inline-block;
+            margin: 0 10px;
+            width: 120px;
+            height: 80px;
+            text-align: center;
+            line-height: 20px;
+            vertical-align: middle;
+        }
 
         .control-button span {
             display: block;
@@ -108,26 +118,29 @@
         .control-label {
             display: inline-block;
             color: white;
-            font-size: 18px;
+            font-size: 22px;
             margin: 0 10px;
             vertical-align: middle;
             text-align: center;
-            line-height: 80px; /* Vertically center the label */
+            line-height: 80px;
+            min-width: 180px;
         }
 
         .control-row {
             display: flex;
-            justify-content: space-between; /* Space between the columns */
+            justify-content: space-between;
             margin-bottom: 15px;
             align-items: center;
             width: 100%;
+            gap: 8px;
         }
 
         .control-button-wrapper {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center buttons */
-            width: 100px; /* Ensure same width for all button columns */
+            align-items: center;
+            width: 100px;
+            gap: 8px;
         }
 
         .control-label-wrapper {
@@ -135,458 +148,570 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 8px;
         }
 
         .controls .control-row {
             display: flex;
-            justify-content: space-evenly; /* Evenly space the columns */
+            justify-content: space-evenly;
             width: 100%;
         }
 
+        .fullscreen-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            padding: 15px;
+            width: 150px;
+            height: 80px;
+            text-align: center;
+            line-height: 20px;
+            z-index: 6;
+            display: none;
+        }
+
+        .reset-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            padding: 15px;
+            width: 120px;
+            height: 80px;
+            text-align: center;
+            line-height: 20px;
+            z-index: 6;
+            display: none;
+        }
+
+        .confirm-button {
+            color: red;
+        }
+
+        .save-load-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 6;
+            display: none;
+        }
+
+        h3 {
+            margin: 10px 0 8px;
+            font-size: 28px;
+            font-weight: normal;
+        }
+
+        p {
+            margin: 0 0 10px;
+            font-size: 24px;
+        }
+
+        .centered-row {
+            justify-content: center !important;
+        }
     </style>
 </head>
 <body>
-    <video id="screenVideo" autoplay></video>
-    <div class="noise-overlay"></div> <!-- Strong noise overlay -->
+    <video id="screenVideo" autoplay playsinline muted></video>
+    <canvas id="noiseCanvas" class="noise-overlay"></canvas>
+
     <div class="controls">
         <p>Use the buttons below to adjust settings:</p>
+
         <div class="control-row">
             <div class="control-button-wrapper">
-                <button class="control-button" id="decrease-brightness">
-                    <span>-</span>
-                </button>
-                <button class="control-button" id="decrease-contrast">
-                    <span>-</span>
-                </button>
-                <button class="control-button" id="decrease-scale">
-                    <span>-</span>
-                </button>
-                <button class="control-button" id="decrease-blur">
-                    <span>-</span>
-                </button>
+                <button class="control-button" id="decrease-brightness"><span>-</span></button>
+                <button class="control-button" id="decrease-contrast"><span>-</span></button>
+                <button class="control-button" id="decrease-scale"><span>-</span></button>
+                <button class="control-button" id="decrease-blur"><span>-</span></button>
+                <button class="control-button" id="decrease-noise-amount"><span>-</span></button>
+                <button class="control-button" id="decrease-noise-size"><span>-</span></button>
+                <button class="control-button" id="decrease-noise-speed"><span>-</span></button>
             </div>
 
             <div class="control-label-wrapper">
-                <span class="control-label" id="brightness-label">Brightness</span>
-                <span class="control-label" id="contrast-label">Contrast</span>
-                <span class="control-label" id="scale-label">Scale</span>
-                <span class="control-label" id="blur-label">Blur</span>
+                <span class="control-label">Brightness</span>
+                <span class="control-label">Contrast</span>
+                <span class="control-label">Scale</span>
+                <span class="control-label">Blur</span>
+                <span class="control-label">Noise Amount</span>
+                <span class="control-label">Noise Size</span>
+                <span class="control-label">Noise Speed</span>
             </div>
 
             <div class="control-button-wrapper">
-                <button class="control-button" id="increase-brightness">
-                    <span>+</span>
-                </button>
-                <button class="control-button" id="increase-contrast">
-                    <span>+</span>
-                </button>
-                <button class="control-button" id="increase-scale">
-                    <span>+</span>
-                </button>
-                <button class="control-button" id="increase-blur">
-                    <span>+</span>
-                </button>
+                <button class="control-button" id="increase-brightness"><span>+</span></button>
+                <button class="control-button" id="increase-contrast"><span>+</span></button>
+                <button class="control-button" id="increase-scale"><span>+</span></button>
+                <button class="control-button" id="increase-blur"><span>+</span></button>
+                <button class="control-button" id="increase-noise-amount"><span>+</span></button>
+                <button class="control-button" id="increase-noise-size"><span>+</span></button>
+                <button class="control-button" id="increase-noise-speed"><span>+</span></button>
             </div>
         </div>
-		<!--
-        <p>Press F11 to toggle fullscreen</p>
-        <p>Press Backspace to reset settings</p>
-		-->
-		<!-- New Flip Image Section -->
-<h3>Flip Image</h3>
-<div class="control-row">
-    <div class="control-label">Horizontal</div>
-    <button class="control-button-flip" id="flip-horizontal" data-enabled="true">
-        <span id="horizontal-status">Enabled</span>
-    </button>
-</div>
-<div class="control-row">
-    <div class="control-label">Vertical</div>
-    <button class="control-button-flip" id="flip-vertical" data-enabled="false">
-        <span id="vertical-status">Disabled</span>
-    </button>
-</div>
 
+        <h3>Flip Image</h3>
+        <div class="control-row">
+            <div class="control-label">Horizontal</div>
+            <button class="control-button-flip" id="flip-horizontal">
+                <span id="horizontal-status">Enabled</span>
+            </button>
+        </div>
+        <div class="control-row">
+            <div class="control-label">Vertical</div>
+            <button class="control-button-flip" id="flip-vertical">
+                <span id="vertical-status">Disabled</span>
+            </button>
+        </div>
+
+        <h3>Noise</h3>
+        <div class="control-row centered-row">
+            <button class="control-button-flip" id="toggle-noise">
+                <span id="noise-status">Enabled</span>
+            </button>
+        </div>
     </div>
+
     <div class="feedback" id="feedback"></div>
 
-    <script>
-        let video = document.getElementById("screenVideo");
-        let videoFilter = video.style.filter;
+    <button class="fullscreen-button" id="fullscreen-toggle">Enter Fullscreen</button>
+    <button class="reset-button" id="reset-button">Reset</button>
 
-        // Default values
+    <div class="save-load-container" id="save-load-container">
+        <button class="control-button-flip" id="save-settings">Save Settings</button>
+        <button class="control-button-flip" id="load-settings-button">Load Settings</button>
+        <input type="file" id="load-settings" style="display: none;" accept=".json,application/json" />
+    </div>
+
+    <script>
+        const video = document.getElementById("screenVideo");
+        const feedback = document.getElementById("feedback");
+        const fullscreenButton = document.getElementById("fullscreen-toggle");
+        const resetButton = document.getElementById("reset-button");
+        const saveLoadContainer = document.getElementById("save-load-container");
+        const controls = document.querySelector(".controls");
+
+        const noiseCanvas = document.getElementById("noiseCanvas");
+        const noiseCtx = noiseCanvas.getContext("2d", { alpha: true });
+
+        const noiseSourceCanvas = document.createElement("canvas");
+        const noiseSourceCtx = noiseSourceCanvas.getContext("2d", { alpha: true });
+
         let brightness = 100;
-        let contrast = 100;
+        let contrast = 90;
         let scale = 1;
         let blur = 75;
+
+        let isHorizontalFlipped = true;
+        let isVerticalFlipped = false;
+
+        let noiseEnabled = true;
+        let noiseAmount = 18;
+        let noiseSize = 1.0;   // 1 = larger baseline grain, 10 = finest grain
+        let noiseSpeed = 60;
+
+        let feedbackTimeout;
+        let isConfirmMode = false;
+        let noiseFrameRequest = null;
+        let lastNoiseFrameTime = 0;
 
         async function startScreenCapture() {
             try {
                 const stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: {
-                        displaySurface: "monitor"
-                    }
+                    video: { displaySurface: "monitor" },
+                    audio: false
                 });
 
                 video.srcObject = stream;
 
-                stream.getVideoTracks()[0].addEventListener('ended', () => {
+                stream.getVideoTracks()[0].addEventListener("ended", () => {
                     video.srcObject = null;
+                    showFeedback("Screen capture stopped");
                 });
-
             } catch (err) {
                 console.error("Screen capture failed:", err);
+                showFeedback("Screen capture failed");
             }
         }
 
-        startScreenCapture();
-
-        // Show controls when mouse enters the window
-        document.body.addEventListener('mouseenter', () => {
-            document.querySelector('.controls').style.display = 'block';
-        });
-
-        // Hide controls when mouse leaves the window
-        document.body.addEventListener('mouseleave', () => {
-            document.querySelector('.controls').style.display = 'none';
-        });
-		// Initialize the flip state variables
-let isHorizontalFlipped = true;
-let isVerticalFlipped = false;
-
-// Toggle horizontal flip
-document.getElementById('flip-horizontal').addEventListener('click', () => {
-    isHorizontalFlipped = !isHorizontalFlipped;
-    video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
-    document.getElementById('horizontal-status').textContent = isHorizontalFlipped ? 'Enabled' : 'Disabled';
-});
-
-// Toggle vertical flip
-document.getElementById('flip-vertical').addEventListener('click', () => {
-    isVerticalFlipped = !isVerticalFlipped;
-    video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
-    document.getElementById('vertical-status').textContent = isVerticalFlipped ? 'Enabled' : 'Disabled';
-});
-
-        // Button click handlers
-        document.getElementById('decrease-brightness').addEventListener('click', () => {
-            brightness = Math.max(0, brightness - 10);
-            updateFilters();
-            showFeedback(`Brightness: ${brightness}%`);
-        });
-
-        document.getElementById('increase-brightness').addEventListener('click', () => {
-            brightness = Math.min(200, brightness + 10);
-            updateFilters();
-            showFeedback(`Brightness: ${brightness}%`);
-        });
-
-        document.getElementById('decrease-contrast').addEventListener('click', () => {
-            contrast = Math.max(0, contrast - 10);
-            updateFilters();
-            showFeedback(`Contrast: ${contrast}%`);
-        });
-
-        document.getElementById('increase-contrast').addEventListener('click', () => {
-            contrast = Math.min(200, contrast + 10);
-            updateFilters();
-            showFeedback(`Contrast: ${contrast}%`);
-        });
-
-        document.getElementById('decrease-scale').addEventListener('click', () => {
-            scale = Math.max(0.5, scale - 0.1);
-            video.style.transform = `scaleX(-1) scale(${scale})`;
-            showFeedback(`Scale: ${Math.round(scale * 100)}%`);
-        });
-
-        document.getElementById('increase-scale').addEventListener('click', () => {
-            scale = Math.min(2, scale + 0.1);
-            video.style.transform = `scaleX(-1) scale(${scale})`;
-            showFeedback(`Scale: ${Math.round(scale * 100)}%`);
-        });
-
-        document.getElementById('decrease-blur').addEventListener('click', () => {
-            blur = Math.max(0, blur - 5);
-            updateFilters();
-            showFeedback(`Blur: ${blur}px`);
-        });
-
-        document.getElementById('increase-blur').addEventListener('click', () => {
-            blur = Math.min(100, blur + 5);
-            updateFilters();
-            showFeedback(`Blur: ${blur}px`);
-        });
-
-        // Fullscreen toggle
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'F11') {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    document.documentElement.requestFullscreen();
-                }
-            } else if (e.key === 'Backspace') {
-                // Reset settings
-                brightness = 100;
-                contrast = 100;
-                scale = 1;
-                blur = 75;
-                updateFilters();
-                video.style.transform = 'scaleX(-1) scale(1)';
-                showFeedback(`Settings reset`);
-            }
-        });
+        function applyTransform() {
+            const flipX = isHorizontalFlipped ? -1 : 1;
+            const flipY = isVerticalFlipped ? -1 : 1;
+            video.style.transform = `scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`;
+        }
 
         function updateFilters() {
             video.style.filter = `brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px)`;
         }
 
-        // Show feedback text
-        let feedbackTimeout;
+        function updateNoiseAppearance() {
+            noiseCanvas.style.opacity = noiseEnabled ? (noiseAmount / 100).toFixed(2) : "0";
+            document.getElementById("noise-status").textContent = noiseEnabled ? "Enabled" : "Disabled";
+        }
+
+        function resizeNoiseCanvas() {
+            noiseCanvas.width = window.innerWidth;
+            noiseCanvas.height = window.innerHeight;
+            noiseCtx.setTransform(1, 0, 0, 1, 0, 0);
+            noiseCtx.imageSmoothingEnabled = false;
+        }
+
+        function getNoiseScale() {
+            const reversed = 11 - noiseSize;
+			
+			const t = (reversed - 1) / 9;
+			
+			const coarseScale = 0.22;
+			const fineScale = 1.35;
+			
+			return coarseScale + (fineScale - coarseScale) * t;
+        }
+
+        function rebuildNoiseSource() {
+            const scaleFactor = getNoiseScale();
+
+            const sourceWidth = Math.max(64, Math.round(window.innerWidth * scaleFactor));
+            const sourceHeight = Math.max(64, Math.round(window.innerHeight * scaleFactor));
+
+            noiseSourceCanvas.width = sourceWidth;
+            noiseSourceCanvas.height = sourceHeight;
+            noiseSourceCtx.imageSmoothingEnabled = false;
+
+            const imageData = noiseSourceCtx.createImageData(sourceWidth, sourceHeight);
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const v = Math.random() * 255 | 0;
+                data[i] = v;
+                data[i + 1] = v;
+                data[i + 2] = v;
+                data[i + 3] = 255;
+            }
+
+            noiseSourceCtx.putImageData(imageData, 0, 0);
+        }
+
+        function renderNoiseFrame(timestamp = 0) {
+            const minInterval = 1000 / Math.max(2, noiseSpeed);
+
+            if (!lastNoiseFrameTime || (timestamp - lastNoiseFrameTime) >= minInterval) {
+                lastNoiseFrameTime = timestamp;
+
+                rebuildNoiseSource();
+
+                noiseCtx.clearRect(0, 0, noiseCanvas.width, noiseCanvas.height);
+                noiseCtx.imageSmoothingEnabled = false;
+
+                const maxOffsetX = Math.max(0, noiseSourceCanvas.width - 8);
+                const maxOffsetY = Math.max(0, noiseSourceCanvas.height - 8);
+                const sx = maxOffsetX > 0 ? (Math.random() * Math.min(8, maxOffsetX)) | 0 : 0;
+                const sy = maxOffsetY > 0 ? (Math.random() * Math.min(8, maxOffsetY)) | 0 : 0;
+                const sw = noiseSourceCanvas.width - sx;
+                const sh = noiseSourceCanvas.height - sy;
+
+                noiseCtx.drawImage(
+                    noiseSourceCanvas,
+                    sx, sy, sw, sh,
+                    0, 0, noiseCanvas.width, noiseCanvas.height
+                );
+            }
+
+            noiseFrameRequest = requestAnimationFrame(renderNoiseFrame);
+        }
+
+        function restartNoise() {
+            if (noiseFrameRequest) {
+                cancelAnimationFrame(noiseFrameRequest);
+                noiseFrameRequest = null;
+            }
+
+            resizeNoiseCanvas();
+            lastNoiseFrameTime = 0;
+
+            if (noiseEnabled) {
+                noiseFrameRequest = requestAnimationFrame(renderNoiseFrame);
+            } else {
+                noiseCtx.clearRect(0, 0, noiseCanvas.width, noiseCanvas.height);
+            }
+
+            updateNoiseAppearance();
+        }
+
         function showFeedback(message) {
-            const feedback = document.getElementById('feedback');
             feedback.textContent = message;
-            feedback.style.display = 'block';
-
-            // Clear any previous timeout
+            feedback.style.display = "block";
             clearTimeout(feedbackTimeout);
-
-            // Hide feedback after 3 seconds unless a new feedback is shown
             feedbackTimeout = setTimeout(() => {
-                feedback.style.display = 'none';
-            }, 3000); // Feedback stays visible for 3 seconds
+                feedback.style.display = "none";
+            }, 3000);
         }
-    </script>
-	<style>
-    /* Fullscreen button styling */
-    .fullscreen-button {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 20px;
-        color: white;
-        background: rgba(0, 0, 0, 0.5);
-        border: none;
-        padding: 15px;
-        cursor: pointer;
-        width: 150px;
-        height: 80px;
-        text-align: center;
-        line-height: 20px;
-        vertical-align: middle;
-        font-family: 'VT323', monospace;
-        z-index: 4;
-        display: none; /* Hidden by default */
-    }
-</style>
 
-<!-- Fullscreen Toggle Button -->
-<button class="fullscreen-button" id="fullscreen-toggle">Enter Fullscreen</button>
-
-<script>
-    const fullscreenButton = document.getElementById("fullscreen-toggle");
-
-    // Toggle fullscreen function
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            fullscreenButton.textContent = "Exit Fullscreen";
-        } else {
-            document.exitFullscreen();
-            fullscreenButton.textContent = "Enter Fullscreen";
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
         }
-    }
 
-    fullscreenButton.addEventListener("click", toggleFullscreen);
+        function setControlsVisible(visible) {
+            const display = visible ? "block" : "none";
+            controls.style.display = display;
+            fullscreenButton.style.display = display;
+            resetButton.style.display = display;
+            saveLoadContainer.style.display = display;
+        }
 
-    // Show controls and fullscreen button when mouse enters the window
-    document.body.addEventListener('mouseenter', () => {
-        document.querySelector('.controls').style.display = 'block';
-        fullscreenButton.style.display = 'block';
-    });
+        function updateFlipLabels() {
+            document.getElementById("horizontal-status").textContent = isHorizontalFlipped ? "Enabled" : "Disabled";
+            document.getElementById("vertical-status").textContent = isVerticalFlipped ? "Enabled" : "Disabled";
+        }
 
-    // Hide controls and fullscreen button when mouse leaves the window
-    document.body.addEventListener('mouseleave', () => {
-        document.querySelector('.controls').style.display = 'none';
-        fullscreenButton.style.display = 'none';
-    });
+        function resetSettings() {
+            brightness = 100;
+            contrast = 90;
+            scale = 1;
+            blur = 75;
 
-    // Update button text when fullscreen changes
-    document.addEventListener("fullscreenchange", () => {
-        fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
-    });
-</script>
+            isHorizontalFlipped = true;
+            isVerticalFlipped = false;
 
-<style>
-    /* Reset button styling */
-    .reset-button {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%); /* Center the button horizontally */
-        font-size: 20px;
-        color: white;
-        background: rgba(0, 0, 0, 0.5);
-        border: none;
-        padding: 15px;
-        cursor: pointer;
-        width: 120px;
-        height: 80px;
-        text-align: center;
-        line-height: 20px;
-        vertical-align: middle;
-        font-family: 'VT323', monospace;
-        z-index: 4;
-        display: none; /* Hidden by default */
-    }
+            noiseEnabled = true;
+            noiseAmount = 18;
+            noiseSize = 1.0;
+            noiseSpeed = 60;
 
-    /* Confirmation button styling (red text) */
-    .confirm-button {
-        color: red;
-    }
-</style>
-
-<!-- Reset Button -->
-<button class="reset-button" id="reset-button">Reset</button>
-
-<script>
-    const resetButton = document.getElementById("reset-button");
-
-// Flag to track if the button is in "Confirm" mode
-let isConfirmMode = false;
-
-// Reset function
-function resetSettings() {
-    // Only reset if in Confirm mode
-    if (isConfirmMode) {
-        // Reset video settings
-        brightness = 100;
-        contrast = 100;
-        scale = 1;
-        blur = 75;
-        updateFilters();
-        video.style.transform = 'scaleX(-1) scale(1)';
-        showFeedback("Settings reset");
-
-        // Reset flip states and labels
-        isHorizontalFlipped = true;  // Set back to initial state
-        isVerticalFlipped = false;  // Set back to initial state
-        document.getElementById('horizontal-status').textContent = 'Enabled'; // Horizontal flip label
-        document.getElementById('vertical-status').textContent = 'Disabled';  // Vertical flip label
-
-        // Reset button to original state after resetting settings
-        resetButton.textContent = "Reset";
-        resetButton.classList.remove("confirm-button");
-        isConfirmMode = false; // Switch back to normal mode
-        // Restore the "changeToConfirm" listener
-        resetButton.removeEventListener("click", resetSettings);
-        resetButton.addEventListener("click", changeToConfirm); // Go back to confirm state on next click
-    }
-}
-
-
-// Change button to "Confirm" when clicked
-function changeToConfirm() {
-    resetButton.textContent = "Confirm";
-    resetButton.classList.add("confirm-button");
-    isConfirmMode = true; // Set Confirm mode to true
-    resetButton.removeEventListener("click", changeToConfirm);
-    resetButton.addEventListener("click", resetSettings); // Trigger reset on next click
-}
-
-resetButton.addEventListener("click", changeToConfirm);
-
-
-
-    // Show controls and reset button when mouse enters the window
-    document.body.addEventListener('mouseenter', () => {
-        document.querySelector('.controls').style.display = 'block';
-        resetButton.style.display = 'block';
-    });
-
-    // Hide controls and reset button when mouse leaves the window
-    document.body.addEventListener('mouseleave', () => {
-        document.querySelector('.controls').style.display = 'none';
-        resetButton.style.display = 'none';
-    });
-</script>
-
-<!-- Save and Load Settings Buttons -->
-<div style="position: absolute; bottom: 20px; right: 20px; z-index: 4;">
-    <button class="control-button-flip" id="save-settings">Save Settings</button>
-    <button class="control-button-flip" id="load-settings-button">Load Settings</button>
-    <input type="file" id="load-settings" style="display: none;" />
-</div>
-
-<script>
-// Save and Load Settings Section
-
-// Function to save settings to a file
-function saveSettingsToFile() {
-    const settings = {
-        brightness,
-        contrast,
-        scale,
-        blur,
-        isHorizontalFlipped,
-        isVerticalFlipped
-    };
-
-    const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'AmbientMonitorSettings.json';
-    link.click();
-}
-
-// Function to load settings from a file
-function loadSettingsFromFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const settings = JSON.parse(e.target.result);
-            // Restore the settings
-            brightness = settings.brightness;
-            contrast = settings.contrast;
-            scale = settings.scale;
-            blur = settings.blur;
-            isHorizontalFlipped = settings.isHorizontalFlipped;
-            isVerticalFlipped = settings.isVerticalFlipped;
-
-            // Update the filters and transformations
             updateFilters();
-            video.style.transform = `scaleX(${isHorizontalFlipped ? -1 : 1}) scaleY(${isVerticalFlipped ? -1 : 1}) scale(${scale})`;
+            applyTransform();
+            updateFlipLabels();
+            restartNoise();
 
-            showFeedback("Settings loaded successfully!");
-        } catch (error) {
-            showFeedback("Failed to load settings.");
+            showFeedback("Settings reset");
         }
-    };
-    reader.readAsText(file);
-}
 
-// Event listeners for the Save and Load buttons
-document.getElementById('save-settings').addEventListener('click', saveSettingsToFile);
-document.getElementById('load-settings-button').addEventListener('click', () => {
-    document.getElementById('load-settings').click();
-});
-document.getElementById('load-settings').addEventListener('change', loadSettingsFromFile);
+        function saveSettingsToFile() {
+            const settings = {
+                brightness,
+                contrast,
+                scale,
+                blur,
+                isHorizontalFlipped,
+                isVerticalFlipped,
+                noiseEnabled,
+                noiseAmount,
+                noiseSize,
+                noiseSpeed
+            };
 
-// Hide the buttons when the mouse leaves, just like the controls
-document.body.addEventListener('mouseleave', () => {
-    document.getElementById('save-settings').style.display = 'none';
-    document.getElementById('load-settings-button').style.display = 'none';
-});
+            const blob = new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "AmbientMonitorSettings.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
 
-document.body.addEventListener('mouseenter', () => {
-    document.getElementById('save-settings').style.display = 'block';
-    document.getElementById('load-settings-button').style.display = 'block';
-});
-</script>
+            showFeedback("Settings saved");
+        }
 
+        function loadSettingsFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const settings = JSON.parse(e.target.result);
+
+                    brightness = typeof settings.brightness === "number" ? settings.brightness : 100;
+                    contrast = typeof settings.contrast === "number" ? settings.contrast : 90;
+                    scale = typeof settings.scale === "number" ? settings.scale : 1;
+                    blur = typeof settings.blur === "number" ? settings.blur : 75;
+                    isHorizontalFlipped = typeof settings.isHorizontalFlipped === "boolean" ? settings.isHorizontalFlipped : true;
+                    isVerticalFlipped = typeof settings.isVerticalFlipped === "boolean" ? settings.isVerticalFlipped : false;
+                    noiseEnabled = typeof settings.noiseEnabled === "boolean" ? settings.noiseEnabled : true;
+                    noiseAmount = typeof settings.noiseAmount === "number" ? settings.noiseAmount : 18;
+                    noiseSize = typeof settings.noiseSize === "number" ? settings.noiseSize : 1.0;
+                    noiseSpeed = typeof settings.noiseSpeed === "number" ? settings.noiseSpeed : 60;
+
+                    brightness = Math.max(0, Math.min(200, brightness));
+                    contrast = Math.max(0, Math.min(200, contrast));
+                    scale = Math.max(0.5, Math.min(2, scale));
+                    blur = Math.max(0, Math.min(100, blur));
+                    noiseAmount = Math.max(0, Math.min(100, noiseAmount));
+                    noiseSize = Math.max(1.0, Math.min(10.0, noiseSize));
+                    noiseSpeed = Math.max(2, Math.min(60, noiseSpeed));
+
+                    updateFilters();
+                    applyTransform();
+                    updateFlipLabels();
+                    restartNoise();
+
+                    showFeedback("Settings loaded successfully");
+                } catch (error) {
+                    console.error(error);
+                    showFeedback("Failed to load settings");
+                }
+            };
+
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        startScreenCapture();
+        updateFilters();
+        applyTransform();
+        updateFlipLabels();
+        restartNoise();
+
+        window.addEventListener("resize", restartNoise);
+
+        document.body.addEventListener("mouseenter", () => setControlsVisible(true));
+        document.body.addEventListener("mouseleave", () => setControlsVisible(false));
+
+        document.getElementById("flip-horizontal").addEventListener("click", () => {
+            isHorizontalFlipped = !isHorizontalFlipped;
+            applyTransform();
+            updateFlipLabels();
+            showFeedback(`Horizontal Flip: ${isHorizontalFlipped ? "On" : "Off"}`);
+        });
+
+        document.getElementById("flip-vertical").addEventListener("click", () => {
+            isVerticalFlipped = !isVerticalFlipped;
+            applyTransform();
+            updateFlipLabels();
+            showFeedback(`Vertical Flip: ${isVerticalFlipped ? "On" : "Off"}`);
+        });
+
+        document.getElementById("toggle-noise").addEventListener("click", () => {
+            noiseEnabled = !noiseEnabled;
+            restartNoise();
+            showFeedback(`Noise: ${noiseEnabled ? "On" : "Off"}`);
+        });
+
+        document.getElementById("decrease-brightness").addEventListener("click", () => {
+            brightness = Math.max(0, brightness - 10);
+            updateFilters();
+            showFeedback(`Brightness: ${brightness}%`);
+        });
+
+        document.getElementById("increase-brightness").addEventListener("click", () => {
+            brightness = Math.min(200, brightness + 10);
+            updateFilters();
+            showFeedback(`Brightness: ${brightness}%`);
+        });
+
+        document.getElementById("decrease-contrast").addEventListener("click", () => {
+            contrast = Math.max(0, contrast - 10);
+            updateFilters();
+            showFeedback(`Contrast: ${contrast}%`);
+        });
+
+        document.getElementById("increase-contrast").addEventListener("click", () => {
+            contrast = Math.min(200, contrast + 10);
+            updateFilters();
+            showFeedback(`Contrast: ${contrast}%`);
+        });
+
+        document.getElementById("decrease-scale").addEventListener("click", () => {
+            scale = Math.max(0.5, +(scale - 0.1).toFixed(2));
+            applyTransform();
+            showFeedback(`Scale: ${Math.round(scale * 100)}%`);
+        });
+
+        document.getElementById("increase-scale").addEventListener("click", () => {
+            scale = Math.min(2, +(scale + 0.1).toFixed(2));
+            applyTransform();
+            showFeedback(`Scale: ${Math.round(scale * 100)}%`);
+        });
+
+        document.getElementById("decrease-blur").addEventListener("click", () => {
+            blur = Math.max(0, blur - 5);
+            updateFilters();
+            showFeedback(`Blur: ${blur}px`);
+        });
+
+        document.getElementById("increase-blur").addEventListener("click", () => {
+            blur = Math.min(100, blur + 5);
+            updateFilters();
+            showFeedback(`Blur: ${blur}px`);
+        });
+
+        document.getElementById("decrease-noise-amount").addEventListener("click", () => {
+            noiseAmount = Math.max(0, noiseAmount - 2);
+            updateNoiseAppearance();
+            showFeedback(`Noise Amount: ${noiseAmount}%`);
+        });
+
+        document.getElementById("increase-noise-amount").addEventListener("click", () => {
+            noiseAmount = Math.min(100, noiseAmount + 2);
+            updateNoiseAppearance();
+            showFeedback(`Noise Amount: ${noiseAmount}%`);
+        });
+
+        document.getElementById("decrease-noise-size").addEventListener("click", () => {
+            noiseSize = Math.max(1.0, +(noiseSize - 0.25).toFixed(2));
+            showFeedback(`Noise Size: ${noiseSize.toFixed(2)}`);
+        });
+
+        document.getElementById("increase-noise-size").addEventListener("click", () => {
+            noiseSize = Math.min(10.0, +(noiseSize + 0.25).toFixed(2));
+            showFeedback(`Noise Size: ${noiseSize.toFixed(2)}`);
+        });
+
+        document.getElementById("decrease-noise-speed").addEventListener("click", () => {
+            noiseSpeed = Math.max(2, noiseSpeed - 2);
+            showFeedback(`Noise Speed: ${noiseSpeed} fps`);
+        });
+
+        document.getElementById("increase-noise-speed").addEventListener("click", () => {
+            noiseSpeed = Math.min(60, noiseSpeed + 2);
+            showFeedback(`Noise Speed: ${noiseSpeed} fps`);
+        });
+
+        fullscreenButton.addEventListener("click", toggleFullscreen);
+
+        document.addEventListener("fullscreenchange", () => {
+            fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
+        });
+
+        function changeToConfirm() {
+            resetButton.textContent = "Confirm";
+            resetButton.classList.add("confirm-button");
+            isConfirmMode = true;
+            resetButton.removeEventListener("click", changeToConfirm);
+            resetButton.addEventListener("click", confirmReset);
+        }
+
+        function confirmReset() {
+            if (!isConfirmMode) return;
+            resetSettings();
+            resetButton.textContent = "Reset";
+            resetButton.classList.remove("confirm-button");
+            isConfirmMode = false;
+            resetButton.removeEventListener("click", confirmReset);
+            resetButton.addEventListener("click", changeToConfirm);
+        }
+
+        resetButton.addEventListener("click", changeToConfirm);
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "F11") {
+                e.preventDefault();
+                toggleFullscreen();
+            } else if (e.key === "Backspace") {
+                e.preventDefault();
+                resetSettings();
+            }
+        });
+
+        document.getElementById("save-settings").addEventListener("click", saveSettingsToFile);
+        document.getElementById("load-settings-button").addEventListener("click", () => {
+            document.getElementById("load-settings").click();
+        });
+        document.getElementById("load-settings").addEventListener("change", loadSettingsFromFile);
+    </script>
 </body>
 </html>
