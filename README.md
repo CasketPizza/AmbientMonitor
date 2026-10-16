@@ -1,3 +1,6 @@
+# This version has been superseded by [this newer, more modern version here.](https://github.com/CasketPizza/AmbientMonitor2)
+# The web version still remains available.
+
 # Ambient Monitor
 An app to make extra monitors ambient displays for games and video by blurring mirrored duplicates of the primary display.  
 ![Ambient Monitor Icon](Ambient_Monitor_Icon.png)  
